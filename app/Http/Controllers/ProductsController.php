@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Models\Products;
+use App\Http\Resources\ProductResource;
 
 class ProductsController extends Controller
 {
@@ -14,17 +15,8 @@ class ProductsController extends Controller
      */
     public function index()
     {
-        return Products::all();
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        //return Products::all();
+        return ProductResource::collection(Products::all());
     }
 
     /**
@@ -35,7 +27,18 @@ class ProductsController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        $product_name = $request->input('name');
+        $product_price = $request->input('price');
+        $product_description = $request->input('description');
+
+        $product = Products::create([
+            'name' => $product_name,
+            'price' => $product_price,
+            'description' => $product_description,
+        ]);
+        return response()->json([
+            'data' => new ProductResource($product)
+        ], 201);
     }
 
     /**
@@ -44,20 +47,9 @@ class ProductsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show(Products $product)
     {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
+        return new ProductResource($product);
     }
 
     /**
@@ -67,9 +59,20 @@ class ProductsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, Products $product)
     {
-        //
+        $product_name = $request->input('name');
+        $product_price = $request->input('price');
+        $product_description = $request->input('description');
+
+        $product->update([
+            'name' => $product_name,
+            'price' => $product_price,
+            'description' => $product_description,
+        ]);
+        return response()->json([
+            'data' => new ProductResource($product)
+        ], 200);
     }
 
     /**
@@ -78,8 +81,9 @@ class ProductsController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
+    public function destroy(Products $product)
     {
-        //
+        $product->delete();
+        return response()->json(null, 204);
     }
 }
